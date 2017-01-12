@@ -58,14 +58,17 @@ func (m *Connection) Connect() (err error) {
 		}
 	}
 
-	session, err := mgo.DialWithInfo(m.Config.DialInfo)
-	if err != nil {
-		return err
+	// If we have already prepared session that we want to pass, in case we want to manage the pool
+	// by ourselves, and provide more customizations to the sessions
+	if m.Session == nil {
+		session, err := mgo.DialWithInfo(m.Config.DialInfo)
+		if err != nil {
+			return err
+		}
+
+		m.Session = session
+		m.Session.SetMode(mgo.Monotonic, true)
 	}
-
-	m.Session = session
-
-	m.Session.SetMode(mgo.Monotonic, true)
 
 	return nil
 }
